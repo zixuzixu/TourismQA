@@ -32,10 +32,22 @@ class Parser:
     def getReviewItem(self, selector, url):
         item = {}
 
-        item["title"] = selector.xpath('//h3[contains(@class,"c-review-block__title")]/text()').get()
+        item["title"] = selector.xpath('//h3[contains(@class,"c-review-block__title")]/text()').get() or ""
         item["description"] = " ".join(selector.xpath('//span[@class="c-review__body"]//text()').extract())
-        item["rating"] = selector.xpath('//div[@class="bui-review-score__badge"]/text()').get()
-        item["date"] = selector.xpath('//span[@class="c-review-block__date"]//text()').get().split(": ")[1]
+        item["rating"] = selector.xpath('//div[@class="bui-review-score__badge"]/text()').get() or "0"
+
+        # Handle date extraction with multiple possible formats
+        date_text = selector.xpath('//span[@class="c-review-block__date"]//text()').get()
+        if date_text:
+            # Try splitting by ": " first (e.g., "Reviewed: 1 January 2023")
+            if ": " in date_text:
+                item["date"] = date_text.split(": ")[1]
+            else:
+                # Use the date as-is if no prefix
+                item["date"] = date_text.strip()
+        else:
+            item["date"] = ""
+
         item["url"] = url
 
         return item
@@ -43,14 +55,34 @@ class Parser:
     def getEntityItem(self, response):
         item = {}
 
-        data = json.loads(response.xpath('//script[@type="application/ld+json"]//text()').extract_first())
-        item["name"] = data["name"]
-        item["address"] = data["address"]["streetAddress"]
-        item["rating"] = data["aggregateRating"]["ratingValue"]/2
+        try:
+            # Try to extract data from JSON-LD
+            data = json.loads(response.xpath('//script[@type="application/ld+json"]//text()').extract_first())
+            item["name"] = data["name"]
+            item["address"] = data["address"]["streetAddress"]
+            item["rating"] = data["aggregateRating"]["ratingValue"]/2
+        except (json.JSONDecodeError, TypeError, KeyError) as e:
+            # Fallback: extract from HTML
+            item["name"] = response.xpath('//h2[@id="hp_hotel_name"]/text()').get() or "Unknown"
+            item["address"] = response.xpath('//span[@class="hp_address_subtitle"]/text()').get() or ""
+            item["rating"] = 0.0
 
-        data = eval(re.search(r'(?<=defaultCoordinates: )(\[.*\])(?=,)', response.text).group())
-        item["latitude"] = data[0]
-        item["longitude"] = data[1]
+        # Extract coordinates using a more precise regex that only captures the array
+        try:
+            coords_match = re.search(r'defaultCoordinates:\s*(\[\s*[\'"][\d.]+[\'"]\s*,\s*[\'"][\d.]+[\'"]\s*\])', response.text)
+            if coords_match:
+                coords_str = coords_match.group(1)
+                # Replace single quotes with double quotes and parse as JSON
+                coords_str = coords_str.replace("'", '"')
+                coords = json.loads(coords_str)
+                item["latitude"] = float(coords[0])
+                item["longitude"] = float(coords[1])
+            else:
+                item["latitude"] = 0.0
+                item["longitude"] = 0.0
+        except (ValueError, IndexError, json.JSONDecodeError):
+            item["latitude"] = 0.0
+            item["longitude"] = 0.0
 
         item["properties"] = response.xpath('//div[contains(@class, "important_facility")]/text()').extract()
         item["description"] = " ".join(response.xpath('//div[@id="property_description_content"]//p//text()').extract())
@@ -60,6 +92,8 @@ class Parser:
         return item
 
 class Crawler(scrapy.Spider):
+    name = "hotels"
+
     def __init__(self, items):
         self.items = items
         self.parser = Parser()

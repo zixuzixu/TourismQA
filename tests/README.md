@@ -8,6 +8,8 @@ This directory contains the test suite for the TourismQA project.
 - `test_common.py` - Tests for utility functions in `utils/common.py`
 - `test_processor_entity.py` - Tests for entity data processing
 - `test_processor1.py` - Tests for post filtering logic (Processor1)
+- `test_getTourqueEntities.py` - Tests for TourQue entity crawler
+- `test_hotels_parser_fix.py` - Tests for Hotels.py parser bug fixes
 - `test_integration.py` - Integration tests for complete workflows
 
 ## Running Tests
@@ -69,7 +71,22 @@ The test suite covers:
    - Long post detection
    - Irrelevant post filtering
 
-4. **Integration Tests** (`test_integration.py`)
+4. **TourQue Entity Crawler** (`test_getTourqueEntities.py`)
+   - Crawler initialization
+   - Entity type filtering (Restaurant/Hotel/Attraction)
+   - Entity ID parsing
+   - Skipping already fetched entities
+   - Directory structure and file saving
+   - Progress bar and crawling workflow
+
+5. **Hotels Parser Fixes** (`test_hotels_parser_fix.py`)
+   - Coordinate extraction with safe regex
+   - JSON parsing instead of eval()
+   - Review date parsing with multiple formats
+   - Error handling for missing data
+   - Edge cases (empty dates, whitespace, multiple colons)
+
+6. **Integration Tests** (`test_integration.py`)
    - End-to-end entity processing
    - Post filtering pipeline
    - Data persistence
