@@ -25,7 +25,7 @@ class TourqueEntitiesCrawler:
             results.append(item)
             bar.update()
 
-        dispatcher.connect(fetcher, signal = signals.item_passed)
+        dispatcher.connect(fetcher, signal = signals.item_scraped)
 
         self.process.crawl(Restaurants.Crawler, items = list(filter(lambda item: item["id"].split("_")[1] == "R", data)))
         self.process.crawl(Hotels.Crawler, items = list(filter(lambda item: item["id"].split("_")[1] == "H", data)))

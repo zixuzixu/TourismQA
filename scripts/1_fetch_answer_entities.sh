@@ -1,0 +1,1 @@
+python -m src.tourque.entities.getTourqueEntities --input_file_path "data/tourque/entities/help/entity_ids_to_entity_urls.json" --output_dir_path "data/tourque/entities/data"

@@ -8,9 +8,9 @@ class Processor:
         pass
 
     def processString(self, s):
-        s = re.sub("\s+", " ", s)
-        s = re.sub("\.+", ".", s)
-        s = re.sub("\?+", "?", s)
+        s = re.sub(r"\s+", " ", s)
+        s = re.sub(r"\.+", ".", s)
+        s = re.sub(r"\?+", "?", s)
         s = s.strip(string.punctuation + " ")
         return s
 

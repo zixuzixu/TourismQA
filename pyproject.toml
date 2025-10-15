@@ -1,0 +1,108 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tourismqa"
+version = "1.0.0"
+description = "A high-level web crawling and scraping framework for extracting tourism entities and forum posts from TripAdvisor"
+readme = "README.md"
+requires-python = ">=3.4"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "DAIR Lab, IIT Delhi"},
+]
+keywords = [
+    "web-scraping",
+    "tourism",
+    "tripadvisor",
+    "question-answering",
+    "dataset-generation",
+    "nlp",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+dependencies = [
+    "tqdm",
+    "nltk",
+    "numpy",
+    "scipy",
+    "scrapy",
+    "dateparser",
+    "fuzzywuzzy",
+    "beautifulsoup4",
+    "scrapy-selenium",
+    "nested-lookup",
+    "scrapy-inline-requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "isort",
+]
+
+[project.urls]
+Homepage = "https://github.com/dair-iitd/TourismQA"
+Repository = "https://github.com/dair-iitd/TourismQA"
+Documentation = "https://github.com/dair-iitd/TourismQA/blob/master/README.md"
+"Bug Tracker" = "https://github.com/dair-iitd/TourismQA/issues"
+
+[project.scripts]
+tourque-fetch-entities = "src.tourque.entities.getTourqueEntities:main"
+tourque-fetch-posts = "src.tourque.posts.getTourquePosts:main"
+tourque-fetch-data = "src.tourque.posts.getTourqueData:main"
+
+[tool.setuptools]
+packages = ["src", "src.tourque", "src.tourque.entities", "src.tourque.posts", "src.custom", "src.custom.fetch", "src.custom.fetch.posts", "src.custom.process", "utils", "utils.crawlers"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
+
+[tool.black]
+line-length = 120
+target-version = ["py38"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+  | data
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip_gitignore = true
+extend_skip_glob = ["data/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src --cov=utils --cov-report=term-missing"
